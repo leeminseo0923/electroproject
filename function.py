@@ -5,7 +5,7 @@ import pandas as pd
 class Data:
     def __init__(self, filename):
       self.data = pd.read_csv(filename,header = 0)
-      self.data.set_index('Name')
+      self.data=self.data.set_index('Name')
     def __str__(self):
       return str(self.data)
     def show_data(self,num=None):
@@ -36,15 +36,15 @@ class Visualize:
 
 
   def draw(self):
-    self.ax.title = self.title
-    for i in range(self.count):
-      self.ax.plot(self.x_data_list[i], self.y_data_list[i])
+    self.ax.set_title(self.title)
+    self.ax.plot(self.x_data_list[-1], self.y_data_list[-1])
+    return self.ax
   
   def draw_data(self):
     self.ax.set_title(self.title)
     x, y = self.data.get_listdata(self.data_i)
     self.ax.plot(x, y)
-    self.ax.grid(color='gray')
+    self.ax.grid(True, color='gray')
     self.ax.set_xlabel('a')
     self.ax.set_ylabel('s')
     return self.ax
@@ -56,31 +56,32 @@ class Visualize:
 
   def changeData(self, index):
     self.data_i = index
-    self.ax=self.clear()
     self.ax=self.draw_data()
     return self.ax
-
   def clear(self):
-    fig, ax= plt.figure()
-    return ax
+    plt.close()
+
 
   
-  def calError(self, num):
+  def calError(self):
     data_x, data_y = self.data.get_listdata(self.data_i)
-    in_x = self.x_data_list[num]
-    in_y = self.y_data_list[num]
+    in_x = self.x_data_list[-1]
+    in_y = self.y_data_list[-1]
     error = -1
     for i in range(len(data_x)):
       for j in range(len(in_x)):
-        if data_x[i] == in_x[i]:
-          error=max((np.abs(data_y-in_y))/data_y,error)
+        if data_x[i] == in_x[j]:
+          error=max((np.abs(data_y[i]-in_y[j]))/data_y[i],error)
+          print(error)
     return error
   
-  def set_title(self, MAX_ERROR, error):
+  def set_title(self, MAX_ERROR=5/100, error=0):
     if error < 0:
       self.title = "don't have same xpoint"
     elif MAX_ERROR > error:
       self.title = 'good, error: {}%'.format(error * 100)
+    else:
+      self.title = 'fail, error: {}%'.format(error*100)
 
 
 
