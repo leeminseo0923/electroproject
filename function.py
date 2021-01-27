@@ -13,7 +13,7 @@ class Data:
     def get_data(self):
       return self.data
     def get_listdata(self,index):
-      d = self.data.loc[index]
+      d = self.data.loc[[index]]
       point_x = []
       point_y = []
       for i in range(len(d.columns)//2):
@@ -21,35 +21,49 @@ class Data:
         point_y.append('Point'+str (i+1)+'y')
       data_x = d[point_x]
       data_y = d[point_y]
-      return data_x.values.tolist(), data_y.values.tolist()
+      return data_x.values.tolist()[0], data_y.values.tolist()[0]
 
 
 class Visualize:
-  def __init__(self, fig, data, num):
-    self.fig = fig
+  def __init__(self, ax, data):
+    self.ax = ax
     self.data = data
     self.x_data_list = []
     self.y_data_list = []
     self.count = 0
     self.title = 'EMPTY INPUT'
-    self.data_i = num
+    self.data_i = data.get_data().index[0]
 
-    plt.title(self.title)
-    plt.plot(data.get_listdata(self.data_i))
-    plt.grid(color='gray')
-    plt.xlabel('a')
-    plt.ylabel('s')
-    return self.fig
 
   def draw(self):
-    plt.title(self.title)
+    self.ax.title = self.title
     for i in range(self.count):
-      plt.plot(self.x_data_list[i], self.y_data_list[i])
+      self.ax.plot(self.x_data_list[i], self.y_data_list[i])
+  
+  def draw_data(self):
+    self.ax.set_title(self.title)
+    x, y = self.data.get_listdata(self.data_i)
+    self.ax.plot(x, y)
+    self.ax.grid(color='gray')
+    self.ax.set_xlabel('a')
+    self.ax.set_ylabel('s')
+    return self.ax
 
   
   def addData(self, x_data, y_data):
     self.x_data_list.append(x_data)
     self.y_data_list.append(y_data)
+
+  def changeData(self, index):
+    self.data_i = index
+    self.ax=self.clear()
+    self.ax=self.draw_data()
+    return self.ax
+
+  def clear(self):
+    fig, ax= plt.figure()
+    return ax
+
   
   def calError(self, num):
     data_x, data_y = self.data.get_listdata(self.data_i)
@@ -79,19 +93,19 @@ class Visualize:
 
 # MAX_ERROR = 5/100
 
-# plt.title('Good')
+# self.ax.title('Good')
 
 # for i in range(len(in_x)):
 #   for j in range(len(data_x)):
 #     if in_x[i] == data_x[j]:
 #       limit = MAX_ERROR * data_y[j]
 #       if data_y[j]-limit>in_y[i] or data_y[j] + limit < in_y[i]:
-#         plt.title('Fault')
+#         self.ax.title('Fault')
 
-# plt.plot(data_x[0], data_y[0],color='black',marker='o')
-# plt.plot(in_x, in_y, color='red',marker='d')
-# plt.grid(color = 'gray')
-# plt.xlabel('a')
-# plt.ylabel('s')
-# plt.show()
+# self.ax.plot(data_x[0], data_y[0],color='black',marker='o')
+# self.ax.plot(in_x, in_y, color='red',marker='d')
+# self.ax.grid(color = 'gray')
+# self.ax.xlabel('a')
+# self.ax.ylabel('s')
+# self.ax.show()
 

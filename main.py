@@ -15,7 +15,9 @@ class MyApp(QWidget):
 
         self.data_choose = QComboBox()
         d=self.data.get_data()
-        self.data_choose.addItem(d.index)
+        for i in range(len(d)):
+            self.data_choose.addItem(d.iloc[i].index[0])
+
         self.cal_button = QPushButton('Calculate')
         self.data_cell = QLabel('a')
         self.input_num = QSpinBox()
@@ -29,7 +31,8 @@ class MyApp(QWidget):
         self.inputbox_y = QHBoxLayout()
         self.inputbox_xy = QVBoxLayout()
         self.inputbox = QHBoxLayout()
-        self.fig = plt.Figure()
+        self.fig, self.ax = plt.subplots()
+        self.vis = Visualize(self.ax, self.data)
         self.canvas = FigureCanvas(self.fig)
 
         self.vbox.addWidget(self.data_cell)
@@ -43,9 +46,10 @@ class MyApp(QWidget):
         self.vbox.addWidget(self.cal_button)
         self.vbox.addWidget(self.canvas)
         self.hbox.addLayout(self.vbox)
+        self.ax = self.vis.draw_data()
+        self.canvas.draw()
 
         self.setLayout(self.hbox)
-
 
         self.showMaximized()
 
@@ -63,11 +67,6 @@ class MyApp(QWidget):
                 del self.input_cell_x[-1]
                 self.inputbox_y.removeWidget(self.input_cell_y[-1])
                 del self.input_cell_y[-1]
-
-
-
-
-
 
 
 if __name__ == '__main__':
