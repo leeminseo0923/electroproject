@@ -82,31 +82,3 @@ class Visualize:
       self.title = 'good, error: {}%'.format(error * 100)
     else:
       self.title = 'fail, error: {}%'.format(error*100)
-
-
-
-# in_x = []
-# in_y = []
-# count=int (input('point number'))
-# for i in range(count):
-#   in_x.append(float (input('x: ')))
-#   in_y.append(float (input('y: ')))
-
-# MAX_ERROR = 5/100
-
-# self.ax.title('Good')
-
-# for i in range(len(in_x)):
-#   for j in range(len(data_x)):
-#     if in_x[i] == data_x[j]:
-#       limit = MAX_ERROR * data_y[j]
-#       if data_y[j]-limit>in_y[i] or data_y[j] + limit < in_y[i]:
-#         self.ax.title('Fault')
-
-# self.ax.plot(data_x[0], data_y[0],color='black',marker='o')
-# self.ax.plot(in_x, in_y, color='red',marker='d')
-# self.ax.grid(color = 'gray')
-# self.ax.xlabel('a')
-# self.ax.ylabel('s')
-# self.ax.show()
-
