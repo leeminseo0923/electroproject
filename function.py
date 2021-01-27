@@ -6,28 +6,69 @@ class Data:
     def __init__(self, filename):
       self.data = pd.read_csv(filename,header = 0)
       self.data.set_index('Name')
-
-      point_x = []
-      point_y = []
-
-      for i in range(len(self.data.columns)//2):
-        point_x.append('Point'+str (i+1)+'x')
-        point_y.append('Point'+str (i+1)+'y')
-      self.data_x = self.data[point_x].values.tolist()
-      self.data_y = self.data[point_y].values.tolist()
     def __str__(self):
       return str(self.data)
     def show_data(self,num=None):
       self.data.head(num)
     def get_data(self):
-      return self.data_x, self.data_y
+      return self.data
+    def get_listdata(self,index):
+      d = self.data.loc[index]
+      point_x = []
+      point_y = []
+      for i in range(len(d.columns)//2):
+        point_x.append('Point'+str (i+1)+'x')
+        point_y.append('Point'+str (i+1)+'y')
+      data_x = d[point_x]
+      data_y = d[point_y]
+      return data_x.values.tolist(), data_y.values.tolist()
 
-      
-filename = 'data.csv'
 
-data = Data(filename)
-# print(data)
-data.show_data()
+class Visualize:
+  def __init__(self, fig, data, num):
+    self.fig = fig
+    self.data = data
+    self.x_data_list = []
+    self.y_data_list = []
+    self.count = 0
+    self.title = 'EMPTY INPUT'
+    self.data_i = num
+
+    plt.title(self.title)
+    plt.plot(data.get_listdata(self.data_i))
+    plt.grid(color='gray')
+    plt.xlabel('a')
+    plt.ylabel('s')
+    return self.fig
+
+  def draw(self):
+    plt.title(self.title)
+    for i in range(self.count):
+      plt.plot(self.x_data_list[i], self.y_data_list[i])
+
+  
+  def addData(self, x_data, y_data):
+    self.x_data_list.append(x_data)
+    self.y_data_list.append(y_data)
+  
+  def calError(self, num):
+    data_x, data_y = self.data.get_listdata(self.data_i)
+    in_x = self.x_data_list[num]
+    in_y = self.y_data_list[num]
+    error = -1
+    for i in range(len(data_x)):
+      for j in range(len(in_x)):
+        if data_x[i] == in_x[i]:
+          error=max((np.abs(data_y-in_y))/data_y,error)
+    return error
+  
+  def set_title(self, MAX_ERROR, error):
+    if error < 0:
+      self.title = "don't have same xpoint"
+    elif MAX_ERROR > error:
+      self.title = 'good, error: {}%'.format(error * 100)
+
+
 
 # in_x = []
 # in_y = []

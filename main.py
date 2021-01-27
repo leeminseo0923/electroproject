@@ -1,14 +1,21 @@
 import sys
-from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QHBoxLayout, QVBoxLayout, QComboBox, QLabel, QDoubleSpinBox, QSpinBox
+from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QHBoxLayout, QVBoxLayout, QLabel, QDoubleSpinBox, QSpinBox, QComboBox
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from function import Data, Visualize
 
 class MyApp(QWidget):
     def __init__(self):
         super().__init__()
+        self.data = Data('data.csv')
         self.initUI()
 
     def initUI(self):
         self.setWindowTitle('TEST PROGRAM')
 
+        self.data_choose = QComboBox()
+        d=self.data.get_data()
+        self.data_choose.addItem(d.index)
         self.cal_button = QPushButton('Calculate')
         self.data_cell = QLabel('a')
         self.input_num = QSpinBox()
@@ -22,6 +29,8 @@ class MyApp(QWidget):
         self.inputbox_y = QHBoxLayout()
         self.inputbox_xy = QVBoxLayout()
         self.inputbox = QHBoxLayout()
+        self.fig = plt.Figure()
+        self.canvas = FigureCanvas(self.fig)
 
         self.vbox.addWidget(self.data_cell)
         self.inputbox.addWidget(self.input_num)
@@ -32,6 +41,7 @@ class MyApp(QWidget):
         self.inputbox.addLayout(self.inputbox_xy)
         self.vbox.addLayout(self.inputbox)
         self.vbox.addWidget(self.cal_button)
+        self.vbox.addWidget(self.canvas)
         self.hbox.addLayout(self.vbox)
 
         self.setLayout(self.hbox)
