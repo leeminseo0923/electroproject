@@ -1,5 +1,6 @@
 import sys
-from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QHBoxLayout, QVBoxLayout, QDoubleSpinBox, QSpinBox, QComboBox, QTableWidget, QTableWidgetItem
+from PyQt5.QtCore import QAbstractAnimation
+from PyQt5.QtWidgets import QAbstractItemView, QWidget, QApplication, QPushButton, QHBoxLayout, QVBoxLayout, QDoubleSpinBox, QSpinBox, QComboBox, QTableWidget, QTableWidgetItem
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from function import Data, Visualize
@@ -8,6 +9,8 @@ class MyApp(QWidget):
     def __init__(self):
         super().__init__()
         self.data = Data('data.csv')
+        self.parameters = {'axes.labelsize' : 20, 'axes.titlesize':25}
+        plt.rcParams.update(self.parameters)
         self.initUI()
 
     def initUI(self):
@@ -16,27 +19,37 @@ class MyApp(QWidget):
         self.data_choose = QComboBox()
         d=self.data.get_data()
         for i in range(len(d)):
-            self.data_choose.addItem(d.index[i])
+            if d.index[i][0] != self.data_choose.itemText(i-1):
+                self.data_choose.addItem(d.index[i][0])
         self.data_choose.activated[str].connect(self.onActivated)
 
-        self.fig, self.ax = plt.subplots()
+        self.data_condition = QComboBox()
+        dc = d.loc[d.index[0][0]]
+        for i in range(len(dc)):
+            self.data_condition.addItem(dc.index.values[i])
+        self.data_condition.activated[str].connect(self.onActivated_condition)
+
+        self.fig, self.ax = plt.subplots(figsize=(50,100))
         self.vis = Visualize(self.ax, self.data)
         self.canvas = FigureCanvas(self.fig)
         self.cal_button = QPushButton('Calculate')
         self.cal_button.clicked.connect(self.calculate)
         self.clr_button = QPushButton('Clear')
         self.clr_button.clicked.connect(self.clear)
-        tempx, tempy = self.data.get_listdata(d.index[0])
+        tempx, tempy = self.data.get_listdata(d.index[0][0], dc.index.values[0])
         self.data_cell = QTableWidget()
-        self.data_cell.setColumnCount(10)
+        self.data_cell.setColumnCount(7)
         self.data_cell.setRowCount(2)
         self.data_cell.setMaximumHeight(100)
-        self.data_cell.setHorizontalHeaderLabels(['Point1','Point2','Point3','Point4','Point5','Point6','Point7','Point8','Point9','Point10'])
+        self.data_cell.setHorizontalHeaderLabels(['Point1','Point2','Point3','Point4','Point5','Point6','Point7'])
         self.data_cell.setVerticalHeaderLabels(['x','y'])
+        self.graph_print = QPushButton('Print')
+        self.graph_print.clicked.connect(self.print_graph)
         for idx ,item in enumerate(tempx):
-            self.data_cell.setItem(0,idx,QTableWidgetItem(str(item)))
+            self.data_cell.setItem(0,idx,QTableWidgetItem(str(item[0])))
         for idx, item in enumerate(tempy):
-            self.data_cell.setItem(1, idx, QTableWidgetItem(str(item)))
+            self.data_cell.setItem(1, idx, QTableWidgetItem(str(item[0])))
+        self.data_cell.setEditTriggers(QAbstractItemView.NoEditTriggers)
         
         self.input_num = QSpinBox()
         self.input_num.setMaximumWidth(100)
@@ -54,7 +67,9 @@ class MyApp(QWidget):
 
         self.btnbox.addWidget(self.cal_button)
         self.btnbox.addWidget(self.clr_button)
+        self.btnbox.addWidget(self.graph_print)
         self.vbox.addWidget(self.data_choose)
+        self.vbox.addWidget(self.data_condition)
         self.vbox.addWidget(self.data_cell)
         self.inputbox.addWidget(self.input_num)
         self.inputbox_x.addWidget(self.input_cell_x[0])
@@ -101,16 +116,36 @@ class MyApp(QWidget):
         self.canvas.draw()
     def clear(self):
         plt.cla()
-        # self.vis.clear()
-        self.vis.title='EMPTY INPUT'
         self.ax = self.vis.draw_data()
         self.canvas.draw()
     def onActivated(self, text):
         plt.cla()
-        # self.vis.clear()
-        self.vis.title='EMPTY INPUT'
         self.ax=self.vis.changeData(text)
         self.canvas.draw()
+        self.data_condition.clear()
+        d = self.data.get_data()
+        d = d.loc[text]
+        for item in d.index.values:
+            self.data_condition.addItem(item)
+        self.change_cell(text, self.vis.condition)
+    
+    def change_cell(self, name, condition):
+        self.data_cell.clear()
+        x, y = self.data.get_listdata(name, condition)
+        for idx ,item in enumerate(x):
+            self.data_cell.setItem(0,idx,QTableWidgetItem(str(item[0])))
+        for idx, item in enumerate(y):
+            self.data_cell.setItem(1, idx, QTableWidgetItem(str(item[0])))
+
+    
+    def print_graph(self):
+        self.canvas.print_png('test.png')
+    
+    def onActivated_condition(self, text):
+        plt.cla()
+        self.ax = self.vis.changeCondition(text)
+        self.canvas.draw()
+        self.change_cell(self.vis.data_i, text)
 
 
 
